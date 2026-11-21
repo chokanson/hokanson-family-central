@@ -36,7 +36,7 @@ body {
   display: grid;
   gap: 18px;
   grid-template-columns: 880px 1fr 1fr;
-  grid-template-rows: 228px 156px 208px 208px 156px;
+  grid-template-rows: 228px 212px 152px 208px 156px;
   transition: filter 1.2s ease;
 }
 body.night #app { filter: brightness(0.30) saturate(0.8); }
@@ -121,19 +121,19 @@ body.night #app { filter: brightness(0.30) saturate(0.8); }
 .stat .v { font-size: 20px; font-weight: 700; }
 
 /* Lock */
-#lock { grid-column: 3; grid-row: 3; padding: 14px 26px; }
-#lockState { font-size: 50px; font-weight: 750; line-height: 1.05; }
+#lock { grid-column: 3; grid-row: 3; padding: 10px 26px; }
+#lockState { font-size: 42px; font-weight: 750; line-height: 1.05; }
 #lockState.locked { color: var(--ink); }
 #lockState.unlocked { color: var(--warn); }
 #lock.lock-warn { border-color: var(--warn); border-width: 3px; }
-#lockBatt { font-size: 24px; font-weight: 600; color: var(--muted); margin-top: 6px; }
+#lockBatt { font-size: 21px; font-weight: 600; color: var(--muted); margin-top: 3px; }
 #lockDev { font-size: 20px; color: var(--muted); font-weight: 550; }
 
 /* Thermostat */
-#thermostat { grid-column: 2; grid-row: 3; padding: 14px 26px; }
-#thTemp { font-size: 58px; font-weight: 700; line-height: 1; }
-#thLine { font-size: 25px; font-weight: 600; color: var(--ink); margin-top: 5px; }
-#thHum { font-size: 22px; color: var(--muted); font-weight: 550; margin-top: 3px; }
+#thermostat { grid-column: 2; grid-row: 3; padding: 10px 26px; }
+#thTemp { font-size: 44px; font-weight: 700; line-height: 1; }
+#thLine { font-size: 22px; font-weight: 600; color: var(--ink); margin-top: 2px; }
+#thHum { font-size: 20px; color: var(--muted); font-weight: 550; margin-top: 2px; }
 
 /* Middle row: Now Spinning + Semester, plus Sprinklers while watering */
 #midRow { grid-column: 2 / 4; grid-row: 4; display: flex; gap: 18px; }
@@ -165,11 +165,13 @@ body.night #app { filter: brightness(0.30) saturate(0.8); }
 .cd-label { font-size: 21px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); margin-top: 7px; line-height: 1.15; }
 
 /* Forecast (77096 daily strip; current conditions live on the Backyard Station) */
-#forecast { grid-column: 2 / 4; grid-row: 2; padding: 14px 26px; display: flex; align-items: center; }
+#forecast { grid-column: 2 / 4; grid-row: 2; padding: 10px 26px; display: flex; align-items: center; }
 #forecastBody { display: grid; grid-template-columns: repeat(4, 1fr); width: 100%; }
 .fc-day { text-align: center; border-left: 2px solid var(--line); padding: 0 8px; }
 .fc-day:first-child { border-left: none; }
 .fc-dow { font-size: 23px; font-weight: 700; color: var(--ink); }
+.fc-icon { height: 56px; display: flex; align-items: center; justify-content: center; margin: 5px 0 3px; }
+.fc-icon svg { width: 54px; height: 54px; display: block; }
 .fc-cond { font-size: 20px; font-weight: 550; color: var(--muted); margin-top: 2px; }
 .fc-temps { font-size: 30px; font-weight: 700; margin-top: 4px; }
 .fc-temps .lo { color: var(--muted); font-weight: 550; }
@@ -618,6 +620,35 @@ var WMO_LABELS = {
   95: 'Thunderstorm', 96: 'Thunderstorm · hail', 99: 'Thunderstorm · hail'
 };
 function wmoLabel(code) { return WMO_LABELS[code] || '—'; }
+var WI_CLOUD = '#A9BCC9', WI_SUN = '#F2C14E', WI_DROP = '#4ECDC4', WI_SNOW = '#E8F1F8';
+function wiSvg(inner) {
+  return '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + inner + '</svg>';
+}
+var WI_CLOUD_PATH = '<path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>';
+var WI_CLOUD_PATH_R = '<path d="M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25"/>';
+var WEATHER_ICONS = {
+  sun: wiSvg('<g stroke="' + WI_SUN + '"><circle cx="12" cy="12" r="4"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></g>'),
+  partly: wiSvg('<g stroke="' + WI_SUN + '"><circle cx="7.5" cy="7" r="2.3"/><line x1="7.5" y1="1.8" x2="7.5" y2="3.2"/><line x1="2.3" y1="7" x2="3.7" y2="7"/><line x1="3.8" y1="3.3" x2="4.8" y2="4.3"/><line x1="11.2" y1="3.3" x2="10.2" y2="4.3"/></g><g stroke="' + WI_CLOUD + '" transform="translate(4.5 6.5) scale(0.78)">' + WI_CLOUD_PATH + '</g>'),
+  cloud: wiSvg('<g stroke="' + WI_CLOUD + '">' + WI_CLOUD_PATH + '</g>'),
+  fog: wiSvg('<g stroke="' + WI_CLOUD + '"><g transform="translate(1.8 0.5) scale(0.85)">' + WI_CLOUD_PATH + '</g><line x1="7" y1="18" x2="17" y2="18"/><line x1="5.5" y1="20.8" x2="15.5" y2="20.8"/></g>'),
+  drizzle: wiSvg('<g stroke="' + WI_CLOUD + '">' + WI_CLOUD_PATH_R + '</g><g stroke="' + WI_DROP + '"><line x1="8" y1="13" x2="8" y2="15"/><line x1="8" y1="19" x2="8" y2="21"/><line x1="12" y1="15" x2="12" y2="17"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="16" y1="13" x2="16" y2="15"/><line x1="16" y1="19" x2="16" y2="21"/></g>'),
+  rain: wiSvg('<g stroke="' + WI_CLOUD + '">' + WI_CLOUD_PATH_R + '</g><g stroke="' + WI_DROP + '"><line x1="8" y1="13" x2="8" y2="21"/><line x1="12" y1="15" x2="12" y2="23"/><line x1="16" y1="13" x2="16" y2="21"/></g>'),
+  heavyRain: wiSvg('<g stroke="' + WI_CLOUD + '">' + WI_CLOUD_PATH_R + '</g><g stroke="' + WI_DROP + '"><line x1="9" y1="13" x2="7.5" y2="21"/><line x1="13" y1="13" x2="11.5" y2="21"/><line x1="17" y1="13" x2="15.5" y2="21"/></g>'),
+  snow: wiSvg('<g stroke="' + WI_CLOUD + '">' + WI_CLOUD_PATH_R + '</g><g fill="' + WI_SNOW + '"><circle cx="8" cy="17" r="1.15" stroke="none"/><circle cx="12" cy="20" r="1.15" stroke="none"/><circle cx="16" cy="17" r="1.15" stroke="none"/><circle cx="10" cy="22.4" r="1.15" stroke="none"/><circle cx="14" cy="22.4" r="1.15" stroke="none"/></g>'),
+  thunder: wiSvg('<g stroke="' + WI_CLOUD + '"><path d="M19 16.9A5 5 0 0 0 18 7h-1.26a8 8 0 1 0-11.62 9"/></g><polygon points="13 11 9 17 15 17 11 23 13 11" fill="' + WI_SUN + '" stroke="' + WI_SUN + '"/>')
+};
+function wmoIcon(code) {
+  if (code === 0) return WEATHER_ICONS.sun;
+  if (code === 1 || code === 2) return WEATHER_ICONS.partly;
+  if (code === 3) return WEATHER_ICONS.cloud;
+  if (code === 45 || code === 48) return WEATHER_ICONS.fog;
+  if (code >= 51 && code <= 57) return WEATHER_ICONS.drizzle;
+  if (code === 61 || code === 63 || code === 80 || code === 81) return WEATHER_ICONS.rain;
+  if (code === 65 || code === 66 || code === 67 || code === 82) return WEATHER_ICONS.heavyRain;
+  if ((code >= 71 && code <= 77) || code === 85 || code === 86) return WEATHER_ICONS.snow;
+  if (code >= 95) return WEATHER_ICONS.thunder;
+  return WEATHER_ICONS.cloud;
+}
 function forecastDayName(dateStr, isFirst) {
   if (isFirst) return 'Today';
   var a = String(dateStr || '').split('-');
@@ -638,6 +669,7 @@ function renderForecast(w) {
       : '<div class="fc-precip"></div>';
     return '<div class="fc-day">' +
       '<div class="fc-dow">' + esc(forecastDayName(d.date, i === 0)) + '</div>' +
+      '<div class="fc-icon">' + wmoIcon(d.code) + '</div>' +
       '<div class="fc-cond">' + esc(wmoLabel(d.code)) + '</div>' +
       '<div class="fc-temps tnum">' + fmtTemp(d.high) + '° <span class="lo">/ ' + fmtTemp(d.low) + '°</span></div>' +
       precip +
