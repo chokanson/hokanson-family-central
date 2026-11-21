@@ -12,14 +12,30 @@
   font-display: swap;
 }
 :root {
-  --bg: #12181E;
-  --ink: #EDF2F4;
-  --muted: #9FB0BC;
-  --pacifica: #4ECDC4;
-  --line: #333F4A;
-  --card: #1F2830;
-  --card-deep: #171F26;
-  --warn: #B3261E;
+  --bg: #F6F7F3;
+  --ink: #261D26;
+  --muted: #625862;
+  --pacifica: #410074;
+  --line: #DAD7DA;
+  --card: #FFFFFF;
+  --card-deep: #F7F8F5;
+  --warn: #CC0000;
+  --steel: #9E989E;
+  --band: rgba(65, 0, 116, 0.07);
+  --band-strong: rgba(65, 0, 116, 0.15);
+}
+html[data-theme="dark"] {
+  --bg: #261D26;
+  --ink: #F6F7F3;
+  --muted: #BCB8BC;
+  --pacifica: #E0AEFF;
+  --line: #625862;
+  --card: #443944;
+  --card-deep: #261D26;
+  --warn: #CC0000;
+  --steel: #E9C7FF;
+  --band: rgba(224, 174, 255, 0.10);
+  --band-strong: rgba(224, 174, 255, 0.20);
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body { height: 100%; overflow: hidden; }
@@ -39,7 +55,7 @@ body {
   grid-template-rows: 228px 212px 152px 208px 156px;
   transition: filter 1.2s ease;
 }
-body.night #app { filter: brightness(0.30) saturate(0.8); }
+
 .card {
   background: var(--card);
   border: 2px solid var(--line);
@@ -63,12 +79,12 @@ body.night #app { filter: brightness(0.30) saturate(0.8); }
 .day-head {
   display: flex; align-items: center; gap: 12px;
   font-size: 30px; font-weight: 700; color: var(--pacifica);
-  background: rgba(78, 205, 196, 0.07);
+  background: var(--band);
   border-left: 5px solid var(--pacifica);
   border-radius: 8px;
   padding: 6px 12px; margin: 18px 0 8px;
 }
-.day-head.today { background: rgba(78, 205, 196, 0.17); }
+.day-head.today { background: var(--band-strong); }
 .day-head .today-chip {
   flex: none;
   background: var(--pacifica); color: var(--bg);
@@ -78,7 +94,7 @@ body.night #app { filter: brightness(0.30) saturate(0.8); }
 .day-head:first-child { margin-top: 2px; }
 .ev { display: flex; align-items: flex-start; gap: 12px; font-size: 28px; padding: 5px 0; }
 .ev .dot { width: 14px; height: 14px; border-radius: 50%; flex: none; margin-top: 10px; }
-.ev .time { flex: none; width: 268px; font-weight: 650; color: #8CA3B5; line-height: 1.2; }
+.ev .time { flex: none; width: 268px; font-weight: 650; color: var(--steel); line-height: 1.2; }
 .ev .main { flex: 1; min-width: 0; }
 .ev .ttl { font-weight: 550; line-height: 1.2; overflow-wrap: break-word; }
 .ev .loc { display: block; color: var(--muted); font-size: 23px; line-height: 1.25; margin-top: 2px; overflow-wrap: break-word; }
@@ -415,8 +431,20 @@ function countdownList(todayKey) {
 }
 /* === PURE MATH END === */
 
-/* ---------- Clock + dimming ---------- */
-var lastDimState = null;
+/* ---------- Clock + day/night theme (NRG Haze light by day, Haze Dark 7:00 p.m.-5:50 a.m. CT) ---------- */
+var THEME = 'light';
+var FORCED_THEME = null;
+try { FORCED_THEME = new URLSearchParams(location.search).get('theme'); } catch (e) {}
+var PAL_LIGHT = { steel: '#9E989E', accent: '#410074', wiCloud: '#9E989E', wiSun: '#FFC20E', wiDrop: '#410074', wiSnow: '#79C7FF' };
+var PAL_DARK = { steel: '#E9C7FF', accent: '#E0AEFF', wiCloud: '#BCB8BC', wiSun: '#FFC20E', wiDrop: '#E0AEFF', wiSnow: '#E5FCFD' };
+function pal() { return THEME === 'dark' ? PAL_DARK : PAL_LIGHT; }
+var lastThemeState = null;
+function applyTheme(dark) {
+  THEME = dark ? 'dark' : 'light';
+  if (dark) document.documentElement.setAttribute('data-theme', 'dark');
+  else document.documentElement.removeAttribute('data-theme');
+  if (lastData) renderAll(lastData);
+}
 function tickClock() {
   var now = new Date();
   var timeFmt = new Intl.DateTimeFormat('en-US', {
@@ -434,10 +462,10 @@ function tickClock() {
 
   var p = nowParts();
   var mins = p.h * 60 + p.mi;
-  var night = mins >= 22 * 60 || mins < 5 * 60 + 50;
-  if (night !== lastDimState) {
-    lastDimState = night;
-    document.body.classList.toggle('night', night);
+  var dark = FORCED_THEME ? (FORCED_THEME === 'dark') : (mins >= 19 * 60 || mins < 5 * 60 + 50);
+  if (dark !== lastThemeState) {
+    lastThemeState = dark;
+    applyTheme(dark);
   }
 }
 
@@ -545,7 +573,7 @@ function renderNowPlaying(np) {
   }
 }
 
-var CAL_COLORS = { 'Family': '#8CA3B5', 'Hokanson Kids Events': '#4ECDC4' };
+
 function renderAgenda(agenda) {
   var p = nowParts();
   var todayKey = dateKey(p.y, p.mo, p.d);
@@ -591,7 +619,7 @@ function renderAgenda(agenda) {
     }
     var MAXEV = 8;
     dayEvents.slice(0, MAXEV).forEach(function (ev) {
-      var color = CAL_COLORS[ev.calendarName] || '#8CA3B5';
+      var color = ev.calendarName === 'Hokanson Kids Events' ? pal().accent : pal().steel;
       var time = ev.allDay ? 'All day' : fmtTimeShort(ev.startISO) + (ev.endISO ? ' – ' + fmtTimeShort(ev.endISO) : '');
       html += '<div class="ev">' +
         '<span class="dot" style="background:' + color + '"></span>' +
@@ -620,13 +648,16 @@ var WMO_LABELS = {
   95: 'Thunderstorm', 96: 'Thunderstorm · hail', 99: 'Thunderstorm · hail'
 };
 function wmoLabel(code) { return WMO_LABELS[code] || '—'; }
-var WI_CLOUD = '#A9BCC9', WI_SUN = '#F2C14E', WI_DROP = '#4ECDC4', WI_SNOW = '#E8F1F8';
+
 function wiSvg(inner) {
   return '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + inner + '</svg>';
 }
 var WI_CLOUD_PATH = '<path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>';
 var WI_CLOUD_PATH_R = '<path d="M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25"/>';
-var WEATHER_ICONS = {
+function weatherIcons() {
+  var P = pal();
+  var WI_CLOUD = P.wiCloud, WI_SUN = P.wiSun, WI_DROP = P.wiDrop, WI_SNOW = P.wiSnow;
+  return {
   sun: wiSvg('<g stroke="' + WI_SUN + '"><circle cx="12" cy="12" r="4"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></g>'),
   partly: wiSvg('<g stroke="' + WI_SUN + '"><circle cx="7.5" cy="7" r="2.3"/><line x1="7.5" y1="1.8" x2="7.5" y2="3.2"/><line x1="2.3" y1="7" x2="3.7" y2="7"/><line x1="3.8" y1="3.3" x2="4.8" y2="4.3"/><line x1="11.2" y1="3.3" x2="10.2" y2="4.3"/></g><g stroke="' + WI_CLOUD + '" transform="translate(4.5 6.5) scale(0.78)">' + WI_CLOUD_PATH + '</g>'),
   cloud: wiSvg('<g stroke="' + WI_CLOUD + '">' + WI_CLOUD_PATH + '</g>'),
@@ -636,8 +667,10 @@ var WEATHER_ICONS = {
   heavyRain: wiSvg('<g stroke="' + WI_CLOUD + '">' + WI_CLOUD_PATH_R + '</g><g stroke="' + WI_DROP + '"><line x1="9" y1="13" x2="7.5" y2="21"/><line x1="13" y1="13" x2="11.5" y2="21"/><line x1="17" y1="13" x2="15.5" y2="21"/></g>'),
   snow: wiSvg('<g stroke="' + WI_CLOUD + '">' + WI_CLOUD_PATH_R + '</g><g fill="' + WI_SNOW + '"><circle cx="8" cy="17" r="1.15" stroke="none"/><circle cx="12" cy="20" r="1.15" stroke="none"/><circle cx="16" cy="17" r="1.15" stroke="none"/><circle cx="10" cy="22.4" r="1.15" stroke="none"/><circle cx="14" cy="22.4" r="1.15" stroke="none"/></g>'),
   thunder: wiSvg('<g stroke="' + WI_CLOUD + '"><path d="M19 16.9A5 5 0 0 0 18 7h-1.26a8 8 0 1 0-11.62 9"/></g><polygon points="13 11 9 17 15 17 11 23 13 11" fill="' + WI_SUN + '" stroke="' + WI_SUN + '"/>')
-};
+  };
+}
 function wmoIcon(code) {
+  var WEATHER_ICONS = weatherIcons();
   if (code === 0) return WEATHER_ICONS.sun;
   if (code === 1 || code === 2) return WEATHER_ICONS.partly;
   if (code === 3) return WEATHER_ICONS.cloud;
