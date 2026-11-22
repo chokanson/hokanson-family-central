@@ -14,15 +14,15 @@
 :root {
   --bg: #F6F7F3;
   --ink: #261D26;
-  --muted: #625862;
+  --muted: #443944;
   --pacifica: #410074;
-  --line: #DAD7DA;
+  --line: #BCB8BC;
   --card: #FFFFFF;
   --card-deep: #F7F8F5;
   --warn: #CC0000;
-  --steel: #9E989E;
-  --band: rgba(65, 0, 116, 0.07);
-  --band-strong: rgba(65, 0, 116, 0.15);
+  --steel: #625862;
+  --band: rgba(65, 0, 116, 0.10);
+  --band-strong: rgba(65, 0, 116, 0.20);
 }
 html[data-theme="dark"] {
   --bg: #261D26;
@@ -435,7 +435,7 @@ function countdownList(todayKey) {
 var THEME = 'light';
 var FORCED_THEME = null;
 try { FORCED_THEME = new URLSearchParams(location.search).get('theme'); } catch (e) {}
-var PAL_LIGHT = { steel: '#9E989E', accent: '#410074', wiCloud: '#9E989E', wiSun: '#FFC20E', wiDrop: '#410074', wiSnow: '#79C7FF' };
+var PAL_LIGHT = { steel: '#625862', accent: '#410074', wiCloud: '#625862', wiSun: '#FFC20E', wiDrop: '#410074', wiSnow: '#006AFF' };
 var PAL_DARK = { steel: '#E9C7FF', accent: '#E0AEFF', wiCloud: '#BCB8BC', wiSun: '#FFC20E', wiDrop: '#E0AEFF', wiSnow: '#E5FCFD' };
 function pal() { return THEME === 'dark' ? PAL_DARK : PAL_LIGHT; }
 var lastThemeState = null;
